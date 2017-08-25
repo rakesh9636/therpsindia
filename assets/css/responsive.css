@@ -1,0 +1,44 @@
+@media only screen and (max-width:1200px){
+
+.nav.navbar-nav {
+    width: 95%;
+}
+.navbar-nav > li > a {
+    padding:10px; 
+}
+.follow_bx {
+    display: table;
+    float: none;
+    margin: 0 auto;
+    text-align: center;
+    width: 210px;
+}
+
+}
+
+@media only screen and (max-width:990px){
+
+.nav.navbar-nav {
+    width: 95%;
+} 
+.follow_bx {
+    display: table;
+    float: none;
+    margin: 0 auto;
+    text-align: center;
+    width: 210px;
+}
+
+}
+
+@media only screen and (max-width:768px){
+
+.nav.navbar-nav {
+    margin: 0;
+    width: 100%;
+}
+.navbar-nav > li > a { 
+    border-radius: 10px;
+}
+
+}
