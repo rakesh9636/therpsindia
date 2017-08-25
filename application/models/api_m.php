@@ -461,4 +461,50 @@ Class Api_m extends CI_Model
 						->get();
 		return $query->result();
 	}
+	
+	// this function is use for getting year id 
+	public function get_current_year_id($year)
+	{
+		$query = $this->db
+						->select('*')
+						->from('year')
+						->where(['name'=>$year])
+						->get();
+		return $query->row();
+	}
+	
+	// this function is use for getting current seassion id 
+	public function get_current_session_id($current_year_id)
+	{
+		$query = $this->db
+						->select('*')
+						->from('session')
+						->where(['to_year_id'=>$current_year_id])
+						->get();
+		return $query->row();
+	}
+	
+	// this function is use for getting student fee info
+	public function student_fee_info($user_id,$current_session_id, $class_id)
+	{
+		$query = $this->db
+						->select('*')
+						->from('student_fee')
+						->where(['student_id'=>$user_id])
+						->where(['session_id'=>$current_session_id])
+						->where(['class_id'=>$class_id])
+						->get();
+		return $query->row();
+	}
+	
+	// this function is use for getting student fee all transection
+	public function student_fee_transection($sf_id)
+	{
+		$query = $this->db
+						->select('*')
+						->from('transection')
+						->where(['sf_id'=>$sf_id])
+						->get();
+		return $query->result();
+	}
 }

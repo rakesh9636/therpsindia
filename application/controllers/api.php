@@ -285,59 +285,77 @@ Class Api extends CI_Controller
 		$post = $this->input->post();
 		if(isset($post['user_id']))
 		{
-			$user_id = $post['user_id'];
-			$user_detail = $this->api_m->get_user_detail($user_id);
-			$class_id = $user_detail[0]->class;
-			$class_f = $this->api_m->class_fee($class_id);
-			$class_fee = $class_f[0]->amount;
-
-			$time = time();
-			$date = unix_to_human($time);
-			$current_year = date('Y', strtotime($date));
-			$c_month = date('m', strtotime($date));
-			$cc_month = explode('0', $c_month);
-			$count = count($cc_month);
-			if($count == 1)
+			$user_id 		=	$post['user_id'];
+			$user_detail 	= 	$this->api_m->get_user_detail($user_id);
+			$class_id 		= 	$user_detail[0]->class;
+			
+			$current_year		= 	date('Y');
+			$current_month		= 	date('m');
+			
+			if($current_month >= 04 )
 			{
-				$month_id = $cc_month[0];
+				$current_year_id	= $this->api_m->get_current_year_id($current_year); 
+				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
+				$current_session_id = $current_session_id->session_id;
 			}
 			else
 			{
-				$month_id = $cc_month[1];
+				$current_year_id	= $this->api_m->get_current_year_id($current_year - 1); 
+				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
+				$current_session_id = $current_session_id->session_id;
 			}
-			if($month_id > 3)
-			{
-				$session = $current_year.'-04-00 00:00:00';
-			}
-			else
-			{
-				$yr = $current_year-1;
-				$session = $yr.'-04-00 00:00:00';
-			}
-			$deposit = $this->api_m->deposit($session, $user_id);
+			
+			$deposit				=	 $this->api_m->student_fee_info($user_id,$current_session_id, $class_id);
+			
+			
 			if($deposit)
 			{
-				foreach($deposit as $deposit)
+				// geting previous session dew
+				if($current_session_id - 1 != 0)
 				{
-					$count = @++$count;
-					$date = date('d-M-Y', strtotime($deposit->fees_paid_date));
-					$result[] = array('id'=>$count, 'pay_for'=>$deposit->fees_paid_for, 'date'=>$date, 'amount'=>$deposit->fees_paid);
-					$total_paid[] = $deposit->fees_paid;
+					$previous_session_dew	= $this->api_m->student_fee_info($user_id,$current_session_id - 1, $class_id);
+					if($previous_session_dew->due_fee != 0)
+					{
+						$previous_dew		= $previous_session_dew->due_fee;
+					}
+					else
+					{
+						$previous_dew		= 0;
+					}
 				}
-				$paid = array_sum($total_paid);
-				$dew = $class_fee-$paid;
-				$data = array('total_fees'=>$class_fee, 'total_dew'=>$dew, 'deposit_details'=>$result);
-				$output = array('status'=>"1", 'message'=>"success", 'data'=>$data);
+				else
+				{
+					$previous_dew		= 0;
+				}
+				
+				$deposit_transection	=	 $this->api_m->student_fee_transection($deposit->sf_id);
+				if($deposit_transection)
+				{
+					foreach($deposit_transection as $transcation)
+					{
+						$count 			= @++$count;
+						$date 			= date('d-M-Y', strtotime($transcation->time));
+						$result[] 		= array('id'=>$count, 'pay_for'=>$transcation->payment_reason, 'date'=>$date, 'amount'=>$transcation->payed_amount);
+					}
+				}
+				else
+				{
+						$result[] 		= array('id'=>1, 'pay_for'=>'No Transection Available', 'date'=>'No Date Available', 'amount'=>'No Amount Available');
+				}
+				$paid 		=	 ($deposit->total_fee - $deposit->due_fee);
+				$dew	 	=	 $deposit->due_fee + $previous_dew;
+				$data 		=	 array('total_fees'=>$deposit->total_fee, 'total_dew'=>$dew, 'deposit_details'=>$result);
+				$output 	=	 array('status'=>"1", 'message'=>"success", 'data'=>$data);
 
 			}
 			else
 			{
-				$output = array('status'=>0, 'message'=>"fail");
+				$output 	= 	array('status'=>0, 'message'=>"fail");
 			}
 		}
 		else
 		{
-			$output = array('status'=>0, 'message'=>"fail");
+			$output 	= 	array('status'=>0, 'message'=>"fail");
 		}
 		echo json_encode($output);
 	}
