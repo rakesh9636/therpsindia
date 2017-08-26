@@ -254,6 +254,7 @@ Class Api_m extends CI_Model
 						->where($data)
 						->get();
 		return $query->result_array();
+		
 	}
 	public function get_time_table($class_id, $date, $exam_type)
 	{
@@ -506,5 +507,17 @@ Class Api_m extends CI_Model
 						->where(['sf_id'=>$sf_id])
 						->get();
 		return $query->result();
+	}
+	
+	// this function is use for getting month attendance report on the base of month number
+	public function get_month_attendance_report($user_id,$current_month)
+	{
+		$data = array('student_user_id'=>$user_id, "DATE_FORMAT(date_created,'%m')"=>$current_month);
+		$query = $this->db
+						->select('*')
+						->from('attendance_report')
+						->where($data)
+						->get();
+		return $query->row_array();
 	}
 }

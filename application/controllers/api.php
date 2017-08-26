@@ -320,7 +320,7 @@ Class Api extends CI_Controller
 					}
 					else
 					{
-						$previous_dew		= 0;
+						$previous_dew	= 0;
 					}
 				}
 				else
@@ -473,59 +473,96 @@ Class Api extends CI_Controller
 	}
 	public function dashboard()
 	{
-		$post = $this->input->post();
-		$user_id = $post['user_id'];
-		$time = time();
-		$date = unix_to_human($time);
-		$c_date = date('d', strtotime($date));
-		$c_month = date('m', strtotime($date));
-		$c_year = date('Y', strtotime($date));
-		$first_date = $c_year.'-'.$c_month.'-00';
-		$last_date = $c_year.'-'.$c_month.'-31';
-		$data = date('Y-m-d', strtotime($date));
-		// $attendance = $this->api_m->get_attendance($user_id, $first_date, $last_date);
-		$attendance = $this->api_m->get_month_attendance($user_id, $first_date, $last_date);
+		$post 			= 	$this->input->post();
+		$user_id 		= 	$post['user_id'];
+		$time 			= 	time();
+		$date 			= 	unix_to_human($time);
+		$c_date 		= 	date('d', strtotime($date));
+		$c_month 		= 	date('m', strtotime($date));
+		$c_year 		= 	date('Y', strtotime($date));
+		$first_date 	= 	$c_year.'-'.$c_month.'-01';
+		$last_date  	= 	$c_year.'-'.$c_month.'-31';
+		$data 			= 	date('Y-m-d', strtotime($date));
 		
-		if($attendance)
+		// getting current month
+		$current_month	= 	date('m');
+		
+		// $attendance = $this->api_m->get_attendance($user_id, $first_date, $last_date);
+		
+		// $attendance 	= 	$this->api_m->get_month_attendance($user_id, $first_date, $last_date);
+		
+		$attendance_report 	= 	$this->api_m->get_month_attendance_report($user_id,$current_month);
+
+		/* old code */
+		
+		/* if($attendance_report)
 		{
-		foreach($attendance as $attendance)
+			foreach($attendance as $attendance)
+			{
+					$att_date = $attendance['date_created'];
+
+						$day = $attendance;
+
+						for($x=1;$x<10;$x++)
+						{
+							if(isset($day['0'.$x]))
+							{
+								$result[] = $day['0'.$x];
+							}
+						}
+						for($y=0;$y<10;$y++)
+						{
+							if(isset($day['1'.$y]))
+							{
+								$result[] = $day['1'.$y];
+							}
+						}
+						for($z=0;$z<10;$z++)
+						{
+							if(isset($day['2'.$z]))
+							{
+								$result[] = $day['2'.$z];
+							}
+						}
+						for($w=0;$w<2;$w++)
+						{
+							if(isset($day['3'.$w]))
+							{
+								$result[] = $day['3'.$w];
+							}
+						}
+			}
+		} */
+		
+		/* old code */ 
+		
+		if($attendance_report)
 		{
-				$att_date = $attendance['date_created'];
-
-					$day = $attendance;
-
-					for($x=1;$x<10;$x++)
-					{
-						if(isset($day['0'.$x]))
-						{
-							$result[] = $day['0'.$x];
-						}
-					}
-					for($y=0;$y<10;$y++)
-					{
-						if(isset($day['1'.$y]))
-						{
-							$result[] = $day['1'.$y];
-						}
-					}
-					for($z=0;$z<10;$z++)
-					{
-						if(isset($day['2'.$z]))
-						{
-							$result[] = $day['2'.$z];
-						}
-					}
-					for($w=0;$w<2;$w++)
-					{
-						if(isset($day['3'.$w]))
-						{
-							$result[] = $day['3'.$w];
-						}
-					}
+			$persents	= array();
+			foreach($attendance_report as $key =>  $attendance)
+			{
+				if($key > 0 && $attendance != '')
+				{
+					$persents[] 	= $attendance;
+				}
+			}
+			$att_date 				= $attendance_report['date_created'];						
+			$total_day_of_class		= count($persents);
+			$total_persent_absent	= array_count_values($persents);
+			$total_persent			= $total_persent_absent['yes'];
+			$total_absent			= $total_persent_absent['no'];
+			$st_present 			= $total_persent;
+			$final_att 				= $total_persent.'/'.$total_day_of_class; //Final Attendence Report
+			$final 					= $total_day_of_class;
 		}
-		}
-
-		if(isset($result))
+		else
+		{
+			$final = 0;
+			$st_present = 0;
+			$final_att = '0/0'; //Final Attendence Report
+		} 
+		
+		/* if(isset($result))
 		{
 			foreach($result as $result)
 			{
@@ -550,24 +587,24 @@ Class Api extends CI_Controller
 			$final = 0;
 			$st_present = 0;
 			$final_att = '0/0'; //Final Attendence Report
-		}
+		} */
 
 		/////////////////////////////////    Fee Detail     ////////////////////////////////
 
 		if($user_id)
 		{
-			$user_id = $post['user_id'];
-			$user_detail = $this->api_m->get_user_detail($user_id);
-			$class_id = $user_detail[0]->class;
-			$class_f = $this->api_m->class_fee($class_id);
-			$class_fee = $class_f[0]->amount;
-
-			$time = time();
-			$date = unix_to_human($time);
-			$current_year = date('Y', strtotime($date));
-			$c_month = date('m', strtotime($date));
-			$cc_month = explode('0', $c_month);
-			$count = count($cc_month);
+			$user_id		 =	 $post['user_id'];
+			$user_detail 	 =	 $this->api_m->get_user_detail($user_id);
+			$class_id 		 =	 $user_detail[0]->class;
+			
+			/* old code of session  */
+			$time			 = 	 time();
+			$date 			 = 	 unix_to_human($time);
+			$current_year 	 = 	 date('Y', strtotime($date));
+			$c_month 		 = 	 date('m', strtotime($date));
+			$cc_month 		 = 	 explode('0', $c_month);
+			$count			 = 	 count($cc_month);
+			
 			if($count == 1)
 			{
 				$month_id = $cc_month[0];
@@ -582,31 +619,61 @@ Class Api extends CI_Controller
 			}
 			else
 			{
-				$yr = $current_year-1;
+				$yr 	 = $current_year-1;
 				$session = $yr.'-04-00 00:00:00';
 			}
-			$deposit = $this->api_m->deposit($session, $user_id);
+			/* old code of session  */
+			/* new code of session  */
+			
+			$current_year		= 	date('Y');
+			$current_month		= 	date('m');
+			
+			if($current_month >= 04 )
+			{
+				$current_year_id	= $this->api_m->get_current_year_id($current_year); 
+				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
+				$current_session_id = $current_session_id->session_id;
+			}
+			else
+			{
+				$current_year_id	= $this->api_m->get_current_year_id($current_year - 1); 
+				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
+				$current_session_id = $current_session_id->session_id;
+			}
+			
+			$deposit				=	 $this->api_m->student_fee_info($user_id,$current_session_id, $class_id);
+			
 			if($deposit)
 			{
-				foreach($deposit as $deposit)
+				// geting previous session dew
+				if($current_session_id - 1 != 0)
 				{
-					$count = @++$count;
-					$date = date('d-M-Y', strtotime($deposit->fees_paid_date));
-					$result[] = array('id'=>$count, 'pay_for'=>$deposit->fees_paid_for, 'date'=>$date, 'amount'=>$deposit->fees_paid);
-					$total_paid[] = $deposit->fees_paid;
+					$previous_session_dew	= $this->api_m->student_fee_info($user_id,$current_session_id - 1, $class_id);
+					if($previous_session_dew->due_fee != 0)
+					{
+						$previous_dew		= $previous_session_dew->due_fee;
+					}
+					else
+					{
+						$previous_dew	= 0;
+					}
 				}
-				$paid = array_sum($total_paid);
-				$dew = $class_fee-$paid; // Fee Detail
-				// $data = array('total_fees'=>$class_fee, 'total_dew'=>$dew, 'deposit_details'=>$result);
-				// $output = array('status'=>"1", 'message'=>"success", 'data'=>$data);
-
+				else
+				{
+					$previous_dew		= 0;
+				}
+				
+				
+				$dew = $deposit->due_fee + $previous_dew; // Fee Detail
+				
 			}
 			else
 			{
 				$dew = "No Data"; // Fee Detail
 			}
+			
 		}
-		$upcoming_event = $this->api_m->upcoming_event($data);
+		$upcoming_event 	= $this->api_m->upcoming_event($data);
 		if($upcoming_event)
 		{
 			$event_result = $upcoming_event[0]->name;	//	upcoming_event
@@ -618,21 +685,21 @@ Class Api extends CI_Controller
 			$event_result = 'No Data';	//	upcoming_event
 			$event_date = 'No Data';
 		}
-		$upcoming_exam = $this->api_m->upcoming_exam($data, $class_id);
+		$upcoming_exam 		= $this->api_m->upcoming_exam($data, $class_id);
 		if($upcoming_exam)
 		{
-			$subject_id = $upcoming_exam[0]->subject_id;
-			$subject = $this->api_m->gett_subject($subject_id);
+			$subject_id 	= $upcoming_exam[0]->subject_id;
+			$subject 		= $this->api_m->gett_subject($subject_id);
 
-			$u_exam = $subject[0]->name;			//	Exam 
-			$up_exam_date = $upcoming_exam[0]->exam_date;
-			$u_exam_date = date('d M Y', strtotime($up_exam_date));	//	Exam Date
+			$u_exam 		= $subject[0]->name;			//	Exam 
+			$up_exam_date 	= $upcoming_exam[0]->exam_date;
+			$u_exam_date 	= date('d M Y', strtotime($up_exam_date));	//	Exam Date
 
 		}
 		else
 		{
-			$u_exam = 'No Data';	//	Exam
-			$u_exam_date = 'No Data';	//	//	Exam Date
+			$u_exam 		= 'No Data';	//	Exam
+			$u_exam_date 	= 'No Data';	//	//	Exam Date
 		}
 
 		if($st_present | $final)
