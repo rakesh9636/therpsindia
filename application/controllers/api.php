@@ -294,7 +294,7 @@ Class Api extends CI_Controller
 			
 			if($current_month >= 04 )
 			{
-				$current_year_id	= $this->api_m->get_current_year_id($current_year); 
+				$current_year_id	= $this->api_m->get_current_year_id($current_year + 1); 
 				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
 				$current_session_id = $current_session_id->session_id;
 			}
@@ -630,7 +630,7 @@ Class Api extends CI_Controller
 			
 			if($current_month >= 04 )
 			{
-				$current_year_id	= $this->api_m->get_current_year_id($current_year); 
+				$current_year_id	= $this->api_m->get_current_year_id($current_year + 1 ); 
 				$current_session_id	= $this->api_m->get_current_session_id($current_year_id->year_id); 
 				$current_session_id = $current_session_id->session_id;
 			}
